@@ -22,7 +22,7 @@ public class TrainingWork {
     private String lastName;
     private boolean isActive;
 
-    @OneToMany(mappedBy = "trainingWork", cascade = CascadeType.ALL)
+    @OneToMany
     private List<TrainingYear> years;
 
 
