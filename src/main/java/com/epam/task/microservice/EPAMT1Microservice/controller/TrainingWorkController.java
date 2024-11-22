@@ -5,13 +5,11 @@ import com.epam.task.microservice.EPAMT1Microservice.model.DTO.TrainingRequest;
 import com.epam.task.microservice.EPAMT1Microservice.service.TrainingWorkService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import io.swagger.v3.oas.annotations.Operation;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/training-work")
@@ -20,9 +18,14 @@ public class TrainingWorkController {
 
     private final TrainingWorkService trainingWorkService;
 
+    private static final Logger log = LoggerFactory.getLogger(TrainingWorkController.class);
+
+
     @Operation(summary = "Accept or reject training work for a trainer")
     @PostMapping("/accept")
-    public ResponseEntity<Void> acceptTrainerWork(@RequestBody TrainingRequest trainingRequest){
+    public ResponseEntity<Void> acceptTrainerWork(@RequestBody TrainingRequest trainingRequest,
+                                                  @RequestHeader("Transaction-ID") String transactionId){
+        log.info("Received Transaction-ID: {}", transactionId);
         trainingWorkService.acceptTrainerWork(trainingRequest);
         return ResponseEntity.ok().build();
     }

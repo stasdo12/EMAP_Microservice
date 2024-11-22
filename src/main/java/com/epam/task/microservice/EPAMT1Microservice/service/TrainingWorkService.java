@@ -1,6 +1,5 @@
 package com.epam.task.microservice.EPAMT1Microservice.service;
 
-
 import com.epam.task.microservice.EPAMT1Microservice.model.DTO.TrainingRequest;
 import com.epam.task.microservice.EPAMT1Microservice.model.TrainingMonth;
 import com.epam.task.microservice.EPAMT1Microservice.model.TrainingWork;
@@ -10,6 +9,9 @@ import com.epam.task.microservice.EPAMT1Microservice.repo.TrainingWorkRepository
 import com.epam.task.microservice.EPAMT1Microservice.repo.TrainingYearRepository;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
@@ -23,13 +25,20 @@ public class TrainingWorkService {
     private final TrainingYearRepository trainingYearsRepository;
     private final TrainingMonthRepository trainingMonthRepository;
 
+    private static final Logger log = LoggerFactory.getLogger(TrainingWorkService.class);
+
+
 
 
     public void acceptTrainerWork(TrainingRequest trainingRequest) {
-        if (trainingRequest.getAction().equalsIgnoreCase("add")) {
+        String transactionId = MDC.get("Transaction-ID");
+        log.info("Transaction ID in service: {}", transactionId);
+        if ("add".equalsIgnoreCase(trainingRequest.getAction())) {
             addTrainingWork(trainingRequest);
+            log.info("Added trained work with Transaction ID: {}", transactionId);
         } else {
             deleteTrainingWork(trainingRequest);
+            log.info("Deleted trained work with Transaction ID: {}", transactionId);
         }
     }
 
