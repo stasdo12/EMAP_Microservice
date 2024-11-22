@@ -34,9 +34,11 @@ public class TrainingWorkService {
         String transactionId = MDC.get("Transaction-ID");
         log.info("Transaction ID in service: {}", transactionId);
         if ("add".equalsIgnoreCase(trainingRequest.getAction())) {
+            log.info("Adding training work for username: {}", trainingRequest.getUsername());
             addTrainingWork(trainingRequest);
             log.info("Added trained work with Transaction ID: {}", transactionId);
         } else {
+            log.info("Deleting training work for username: {}", trainingRequest.getUsername());
             deleteTrainingWork(trainingRequest);
             log.info("Deleted trained work with Transaction ID: {}", transactionId);
         }
@@ -44,15 +46,20 @@ public class TrainingWorkService {
 
     public void addTrainingWork(TrainingRequest trainingRequest) {
         if (trainingWorkRepository.findByUsername(trainingRequest.getUsername()).isEmpty()) {
+            log.info("Creating new training work entry for username: {}", trainingRequest.getUsername());
             createTrainingWork(trainingRequest);
         } else {
+            log.info("Updating existing training work entry for username: {}", trainingRequest.getUsername());
             updateTrainingWork(trainingRequest);
         }
     }
 
     public void deleteTrainingWork(TrainingRequest trainingRequest) {
         TrainingWork trainingWork = trainingWorkRepository.findByUsername(trainingRequest.getUsername())
-                .orElseThrow(() -> new NotFoundException("Training work not found"));
+                .orElseThrow(() -> {
+                    log.error("Training work not found for username: {}", trainingRequest.getUsername());
+                    return new NotFoundException("Training work not found");
+                });
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(trainingRequest.getDate());
@@ -60,12 +67,15 @@ public class TrainingWorkService {
         String currentMonth = String.valueOf(calendar.get(Calendar.MONTH));
 
         List<TrainingYear> trainingYears = trainingWork.getYears();
+        log.info("Removing training month from year {} and month {} for username: {}", currentYear, currentMonth, trainingRequest.getUsername());
         removeTrainingMonthFromYear(trainingYears, currentYear, currentMonth, trainingRequest);
 
         if (trainingYears.isEmpty()) {
+            log.info("No more training years left. Deleting training work entry for username: {}", trainingRequest.getUsername());
             trainingWorkRepository.delete(trainingWork);
         } else {
             trainingWork.setYears(trainingYears);
+            log.info("Updated training work for username: {} with new training years", trainingRequest.getUsername());
             trainingWorkRepository.save(trainingWork);
         }
     }
@@ -79,6 +89,7 @@ public class TrainingWorkService {
         List<TrainingYear> years = List.of(createTrainingYears(trainingRequest));
         trainingWork.setYears(years);
         trainingWorkRepository.save(trainingWork);
+        log.info("Training work created for username: {}", trainingRequest.getUsername());
     }
 
     private void updateTrainingWork(TrainingRequest trainingRequest) {
@@ -86,6 +97,7 @@ public class TrainingWorkService {
         List<TrainingYear> years = updateTrainingYears(trainingWork, trainingRequest);
         trainingWork.setYears(years);
         trainingWorkRepository.save(trainingWork);
+        log.info("Training work updated for username: {}", trainingRequest.getUsername());
     }
 
     private TrainingYear createTrainingYears(TrainingRequest trainingRequest) {
@@ -96,6 +108,7 @@ public class TrainingWorkService {
         List<TrainingMonth> months = List.of(createTrainingMonth(trainingRequest));
         trainingYears.setMonths(months);
         trainingYearsRepository.save(trainingYears);
+        log.info("Created new training year for year: {}", trainingYears.getYearNumber());
         return trainingYears;
     }
 
@@ -110,6 +123,7 @@ public class TrainingWorkService {
                 year.setMonths(months);
                 trainingYearsRepository.save(year);
                 present = true;
+                log.info("Updated training year for year: {}", year.getYearNumber());
                 break;
             }
         }
@@ -127,6 +141,7 @@ public class TrainingWorkService {
         trainingMonth.setMonthName(String.valueOf(calendar.get(Calendar.MONTH)));
         trainingMonth.setHours(trainingRequest.getDuration());
         trainingMonthRepository.save(trainingMonth);
+        log.info("Created new training month for month: {} with hours: {}", trainingMonth.getMonthName(), trainingMonth.getHours());
         return trainingMonth;
     }
 
@@ -141,6 +156,7 @@ public class TrainingWorkService {
                 month.setHours(hours);
                 trainingMonthRepository.save(month);
                 present = true;
+                log.info("Updated training month for month: {} with new hours: {}", month.getMonthName(), month.getHours());
                 break;
             }
         }
@@ -162,9 +178,11 @@ public class TrainingWorkService {
                 if (trainingMonths.isEmpty()) {
                     yearIterator.remove();
                     trainingYearsRepository.delete(trainingYear);
+                    log.info("Deleted training year for year: {}", trainingYear.getYearNumber());
                 } else {
                     trainingYear.setMonths(trainingMonths);
                     trainingYearsRepository.save(trainingYear);
+                    log.info("Updated training year for year: {}", trainingYear.getYearNumber());
                 }
                 break;
             }
@@ -181,9 +199,11 @@ public class TrainingWorkService {
                 if (result == 0) {
                     monthIterator.remove();
                     trainingMonthRepository.delete(trainingMonth);
+                    log.info("Deleted training month for month: {} after removing hours", trainingMonth.getMonthName());
                 } else {
                     trainingMonth.setHours(result);
                     trainingMonthRepository.save(trainingMonth);
+                    log.info("Updated training month for month: {} with remaining hours: {}", trainingMonth.getMonthName(), trainingMonth.getHours());
                 }
                 break;
             }

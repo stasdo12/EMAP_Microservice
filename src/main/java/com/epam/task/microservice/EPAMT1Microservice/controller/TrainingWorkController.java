@@ -25,8 +25,9 @@ public class TrainingWorkController {
     @PostMapping("/accept")
     public ResponseEntity<Void> acceptTrainerWork(@RequestBody TrainingRequest trainingRequest,
                                                   @RequestHeader("Transaction-ID") String transactionId){
-        log.info("Received Transaction-ID: {}", transactionId);
+        log.debug("Processing acceptance of trainer work, Transaction-ID: {}", transactionId);
         trainingWorkService.acceptTrainerWork(trainingRequest);
+        log.info("Successfully processed acceptance for Transaction-ID: {}", transactionId);
         return ResponseEntity.ok().build();
     }
 
@@ -39,14 +40,18 @@ public class TrainingWorkController {
             })
     @PostMapping("/add")
     public ResponseEntity<Void> addTrainingWork(@RequestBody TrainingRequest trainingRequest){
+        log.debug("Adding new training work entry: {}", trainingRequest);
         trainingWorkService.addTrainingWork(trainingRequest);
+        log.info("Successfully added new training work entry for trainer: {}", trainingRequest.getUsername());
         return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Delete a trainer's training work")
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteTrainingWork(@RequestBody TrainingRequest trainingRequest){
+        log.debug("Request to delete training work for trainer: {}", trainingRequest);
         trainingWorkService.deleteTrainingWork(trainingRequest);
+        log.info("Successfully deleted training work for trainer: {}", trainingRequest.getUsername());
         return ResponseEntity.ok().build();
     }
 
