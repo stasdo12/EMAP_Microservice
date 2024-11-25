@@ -1,6 +1,5 @@
 package com.epam.task.microservice.EPAMT1Microservice.controller;
 
-
 import com.epam.task.microservice.EPAMT1Microservice.model.DTO.TrainingRequest;
 import com.epam.task.microservice.EPAMT1Microservice.service.TrainingWorkService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -20,7 +19,6 @@ public class TrainingWorkController {
     private final TrainingWorkService trainingWorkService;
 
     private static final Logger log = LoggerFactory.getLogger(TrainingWorkController.class);
-
 
     @Operation(summary = "Accept or reject training work for a trainer")
     @PostMapping("/accept")

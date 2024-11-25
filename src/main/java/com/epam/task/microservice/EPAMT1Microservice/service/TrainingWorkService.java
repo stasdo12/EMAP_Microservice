@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -25,11 +24,7 @@ public class TrainingWorkService {
     private final TrainingWorkRepository trainingWorkRepository;
     private final TrainingYearRepository trainingYearsRepository;
     private final TrainingMonthRepository trainingMonthRepository;
-
     private static final Logger log = LoggerFactory.getLogger(TrainingWorkService.class);
-
-
-
 
     public void acceptTrainerWork(TrainingRequest trainingRequest) {
         String transactionId = MDC.get("Transaction-ID");
@@ -114,6 +109,7 @@ public class TrainingWorkService {
         trainingYearsRepository.save(trainingYears);
         log.info("Created new training year for year: {}", trainingYears.getYearNumber());
         return trainingYears;
+
     }
 
     private List<TrainingYear> updateTrainingYears(TrainingWork trainingWork, TrainingRequest trainingRequest) {
@@ -136,6 +132,7 @@ public class TrainingWorkService {
             trainingYears.add(ty);
         }
         return trainingYears;
+
     }
 
     private TrainingMonth createTrainingMonth(TrainingRequest trainingRequest) {
@@ -147,6 +144,7 @@ public class TrainingWorkService {
         trainingMonthRepository.save(trainingMonth);
         log.info("Created new training month for month: {} with hours: {}", trainingMonth.getMonthName(), trainingMonth.getHours());
         return trainingMonth;
+
     }
 
     private List<TrainingMonth> updateTrainingMonth(TrainingYear trainingYears, TrainingRequest trainingRequest) {
@@ -212,6 +210,5 @@ public class TrainingWorkService {
                 break;
             }
         }
-
     }
 }

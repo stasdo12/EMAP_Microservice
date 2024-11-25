@@ -12,7 +12,6 @@ public class FilterConfig {
 
     private static final Logger log = LoggerFactory.getLogger(FilterConfig.class);
 
-
     @Bean
     public FilterRegistrationBean<TransactionIdFilter> transactionIdFilter(){
         FilterRegistrationBean<TransactionIdFilter> registrationBean = new FilterRegistrationBean<>();
@@ -21,4 +20,5 @@ public class FilterConfig {
         log.info("TransactionIdFilter registered for /training-work/* URL patterns");
         return  registrationBean;
     }
+
 }

@@ -1,6 +1,5 @@
 package com.epam.task.microservice.EPAMT1Microservice.model.DTO;
 
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
@@ -15,7 +14,6 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TrainingRequest {
-
 
     @NotBlank(message = "Username is required")
     private String username;
@@ -39,4 +37,5 @@ public class TrainingRequest {
 
     @NotBlank(message = "Action is required")
     private String action;
+
 }

@@ -17,8 +17,8 @@ import java.io.IOException;
 public class TransactionIdFilter implements Filter {
 
     private static final String TRANSACTION_ID = "Transaction-ID";
-    private static final Logger log = LoggerFactory.getLogger(TrainingWorkService.class);
 
+    private static final Logger log = LoggerFactory.getLogger(TrainingWorkService.class);
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
@@ -34,11 +34,11 @@ public class TransactionIdFilter implements Filter {
             log.info("Transaction-ID set in filter: NO TRANSACTION");
 
         }
-
         try {
             filterChain.doFilter(servletRequest, servletResponse);
         } finally {
             MDC.clear();
         }
     }
+
 }

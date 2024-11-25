@@ -51,4 +51,5 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException ex) {
         return ResponseEntity.badRequest().body("Validation error: " + ex.getMessage());
     }
+
 }
