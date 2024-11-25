@@ -1,5 +1,6 @@
 package com.epam.task.microservice.EPAMT1Microservice.service;
 
+import com.epam.task.microservice.EPAMT1Microservice.exceprion.ResourceNotFoundException;
 import com.epam.task.microservice.EPAMT1Microservice.model.DTO.TrainingRequest;
 import com.epam.task.microservice.EPAMT1Microservice.model.TrainingMonth;
 import com.epam.task.microservice.EPAMT1Microservice.model.TrainingWork;
@@ -7,13 +8,13 @@ import com.epam.task.microservice.EPAMT1Microservice.model.TrainingYear;
 import com.epam.task.microservice.EPAMT1Microservice.repo.TrainingMonthRepository;
 import com.epam.task.microservice.EPAMT1Microservice.repo.TrainingWorkRepository;
 import com.epam.task.microservice.EPAMT1Microservice.repo.TrainingYearRepository;
-import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
@@ -58,7 +59,8 @@ public class TrainingWorkService {
         TrainingWork trainingWork = trainingWorkRepository.findByUsername(trainingRequest.getUsername())
                 .orElseThrow(() -> {
                     log.error("Training work not found for username: {}", trainingRequest.getUsername());
-                    return new NotFoundException("Training work not found");
+                    return new ResourceNotFoundException("Training work not found for username: "
+                            + trainingRequest.getUsername());
                 });
 
         Calendar calendar = Calendar.getInstance();
@@ -86,7 +88,8 @@ public class TrainingWorkService {
         trainingWork.setLastName(trainingRequest.getLastName());
         trainingWork.setActive(trainingRequest.getIsActive());
         trainingWork.setUsername(trainingRequest.getUsername());
-        List<TrainingYear> years = List.of(createTrainingYears(trainingRequest));
+        List<TrainingYear> years = new ArrayList<>();
+        years.add(createTrainingYears(trainingRequest));
         trainingWork.setYears(years);
         trainingWorkRepository.save(trainingWork);
         log.info("Training work created for username: {}", trainingRequest.getUsername());
@@ -105,7 +108,8 @@ public class TrainingWorkService {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(trainingRequest.getDate());
         trainingYears.setYearNumber(String.valueOf(calendar.get(Calendar.YEAR)));
-        List<TrainingMonth> months = List.of(createTrainingMonth(trainingRequest));
+        List<TrainingMonth> months = new ArrayList<>();
+        months.add(createTrainingMonth(trainingRequest));
         trainingYears.setMonths(months);
         trainingYearsRepository.save(trainingYears);
         log.info("Created new training year for year: {}", trainingYears.getYearNumber());
@@ -172,7 +176,7 @@ public class TrainingWorkService {
         while (yearIterator.hasNext()) {
             TrainingYear trainingYear = yearIterator.next();
             if (trainingYear.getYearNumber().equals(year)) {
-                List<TrainingMonth> trainingMonths = trainingYear.getMonths();
+                List<TrainingMonth> trainingMonths = new ArrayList<>(trainingYear.getMonths());
                 removeTrainingMonth(trainingMonths, month, trainingRequest);
 
                 if (trainingMonths.isEmpty()) {

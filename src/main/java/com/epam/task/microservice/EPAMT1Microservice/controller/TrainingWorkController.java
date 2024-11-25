@@ -4,6 +4,7 @@ package com.epam.task.microservice.EPAMT1Microservice.controller;
 import com.epam.task.microservice.EPAMT1Microservice.model.DTO.TrainingRequest;
 import com.epam.task.microservice.EPAMT1Microservice.service.TrainingWorkService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +24,12 @@ public class TrainingWorkController {
 
     @Operation(summary = "Accept or reject training work for a trainer")
     @PostMapping("/accept")
-    public ResponseEntity<Void> acceptTrainerWork(@RequestBody TrainingRequest trainingRequest,
+    public ResponseEntity<Void> acceptTrainerWork(@Valid @RequestBody TrainingRequest trainingRequest,
                                                   @RequestHeader("Transaction-ID") String transactionId){
+        if (transactionId == null || transactionId.isBlank()) {
+            log.error("Missing Transaction-ID header");
+            return ResponseEntity.badRequest().build();
+        }
         log.debug("Processing acceptance of trainer work, Transaction-ID: {}", transactionId);
         trainingWorkService.acceptTrainerWork(trainingRequest);
         log.info("Successfully processed acceptance for Transaction-ID: {}", transactionId);
@@ -39,7 +44,7 @@ public class TrainingWorkController {
                     @ApiResponse(responseCode = "400", description = "Invalid request data")
             })
     @PostMapping("/add")
-    public ResponseEntity<Void> addTrainingWork(@RequestBody TrainingRequest trainingRequest){
+    public ResponseEntity<Void> addTrainingWork(@Valid @RequestBody TrainingRequest trainingRequest){
         log.debug("Adding new training work entry: {}", trainingRequest);
         trainingWorkService.addTrainingWork(trainingRequest);
         log.info("Successfully added new training work entry for trainer: {}", trainingRequest.getUsername());
@@ -48,7 +53,7 @@ public class TrainingWorkController {
 
     @Operation(summary = "Delete a trainer's training work")
     @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteTrainingWork(@RequestBody TrainingRequest trainingRequest){
+    public ResponseEntity<Void> deleteTrainingWork(@Valid @RequestBody TrainingRequest trainingRequest){
         log.debug("Request to delete training work for trainer: {}", trainingRequest);
         trainingWorkService.deleteTrainingWork(trainingRequest);
         log.info("Successfully deleted training work for trainer: {}", trainingRequest.getUsername());
