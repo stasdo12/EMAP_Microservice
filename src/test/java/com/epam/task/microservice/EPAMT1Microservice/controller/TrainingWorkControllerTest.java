@@ -13,6 +13,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
+import java.util.Date;
+
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -35,8 +38,14 @@ class TrainingWorkControllerTest {
     void setUp() {
         objectMapper = new ObjectMapper();
         trainingRequest = new TrainingRequest();
+
         trainingRequest.setUsername("testUser");
+        trainingRequest.setFirstName("John");
+        trainingRequest.setLastName("Doe");
+        trainingRequest.setIsActive(true);
+        trainingRequest.setDate(new Date(2024 - 1900, 11, 3));
         trainingRequest.setDuration(10);
+        trainingRequest.setAction("someAction");
     }
 
     @Test

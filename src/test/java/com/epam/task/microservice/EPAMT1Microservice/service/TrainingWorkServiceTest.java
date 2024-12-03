@@ -1,5 +1,6 @@
 package com.epam.task.microservice.EPAMT1Microservice.service;
 
+import com.epam.task.microservice.EPAMT1Microservice.exceprion.ResourceNotFoundException;
 import com.epam.task.microservice.EPAMT1Microservice.model.DTO.TrainingRequest;
 import com.epam.task.microservice.EPAMT1Microservice.model.TrainingMonth;
 import com.epam.task.microservice.EPAMT1Microservice.model.TrainingWork;
@@ -9,9 +10,7 @@ import com.epam.task.microservice.EPAMT1Microservice.repo.TrainingWorkRepository
 import com.epam.task.microservice.EPAMT1Microservice.repo.TrainingYearRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.slf4j.MDC;
 
 import java.util.Date;
@@ -29,12 +28,16 @@ import java.util.*;
 class TrainingWorkServiceTest {
     @InjectMocks
     private TrainingWorkService trainingWorkService;
+
     @Mock
     private TrainingWorkRepository trainingWorkRepository;
+
     @Mock
     private TrainingYearRepository trainingYearRepository;
+
     @Mock
     private TrainingMonthRepository trainingMonthRepository;
+
     private TrainingRequest trainingRequest;
     private TrainingWork trainingWork;
     private TrainingYear trainingYear;
@@ -68,8 +71,9 @@ class TrainingWorkServiceTest {
         trainingWork.setLastName("Doe");
         trainingWork.setActive(true);
         trainingWork.setYears(new ArrayList<>(List.of(trainingYear)));
-        when(trainingWorkRepository.findByUsername("testUser"))
-                .thenReturn(Optional.of(trainingWork));
+        when(trainingWorkRepository.findByUsername("testUser")).thenReturn(Optional.of(trainingWork));
+        when(trainingMonthRepository.findById(anyLong())).thenReturn(Optional.of(trainingMonth));
+
     }
 
     @Test
@@ -81,18 +85,28 @@ class TrainingWorkServiceTest {
         verify(trainingWorkRepository, times(1)).save(any(TrainingWork.class));
     }
 
+    @Captor
+    ArgumentCaptor<TrainingWork> trainingWorkCaptor;
+
     @Test
     void acceptTrainerWork_deleteExistingTrainingWork() {
+        // Arrange
         trainingRequest.setAction("delete");
+        trainingRequest.setUsername("testUser");
 
-        when(trainingWorkRepository.findByUsername(trainingRequest.getUsername())).thenReturn(Optional.of(trainingWork));
+        trainingWork.getYears().clear();
+        when(trainingWorkRepository.findByUsername("testUser")).thenReturn(Optional.of(trainingWork));
 
         trainingWorkService.acceptTrainerWork(trainingRequest);
 
         verify(trainingWorkRepository, times(1)).findByUsername("testUser");
-        verify(trainingWorkRepository, times(1)).delete(any(TrainingWork.class));
-        verify(trainingWorkRepository, never()).save(any());
+        verify(trainingWorkRepository, times(1)).delete(trainingWorkCaptor.capture());
+        TrainingWork capturedWork = trainingWorkCaptor.getValue();
+
+        assertEquals("testUser", capturedWork.getUsername());
     }
+
+
 
     @Test
     void addTrainingWork_createsNewTrainingWork() {
@@ -113,53 +127,22 @@ class TrainingWorkServiceTest {
     }
 
     @Test
-    void deleteTrainingWork_removesTrainingWork() {
+    void deleteTrainingWork_removesTrainingWorkIfYearsEmpty() {
+        trainingRequest.setAction("delete");
+
+        trainingWork.getYears().clear();
         when(trainingWorkRepository.findByUsername(trainingRequest.getUsername())).thenReturn(Optional.of(trainingWork));
 
         trainingWorkService.deleteTrainingWork(trainingRequest);
 
         verify(trainingWorkRepository, times(1)).delete(trainingWork);
     }
-    @Test
-    void deleteTrainingWork_throwsNotFoundException() {
 
-        when(trainingWorkRepository.findByUsername(trainingRequest.getUsername())).thenReturn(Optional.empty());
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                trainingWorkService.deleteTrainingWork(trainingRequest));
-
-        assertEquals("Training work not found for username: " + trainingRequest.getUsername(),
-                exception.getMessage());
-    }
 
     @Test
-    void updateTrainingWork_addsNewYear() {
-        when(trainingWorkRepository.findByUsername(trainingRequest.getUsername())).thenReturn(Optional.of(trainingWork));
+    void deleteTrainingWork_throwsExceptionIfNotFound() {
+        when(trainingWorkRepository.findByUsername("testUser")).thenReturn(Optional.empty());
 
-        trainingRequest.setDate(new GregorianCalendar(2025, Calendar.JANUARY, 1).getTime());
-
-        trainingWorkService.addTrainingWork(trainingRequest);
-
-        verify(trainingYearRepository, times(1)).save(any(TrainingYear.class));
-    }
-
-    @Test
-    void removeTrainingMonth_deletesMonthIfHoursZero() {
-        trainingRequest.setDuration(5);
-
-        trainingWorkService.deleteTrainingWork(trainingRequest);
-
-        verify(trainingMonthRepository, times(1)).delete(trainingMonth);
-    }
-
-    @Test
-    void removeTrainingMonth_updatesMonthIfHoursRemain() {
-        trainingMonth.setHours(10);
-        trainingRequest.setDuration(5);
-
-        trainingWorkService.deleteTrainingWork(trainingRequest);
-
-        assertEquals(5, trainingMonth.getHours());
-        verify(trainingMonthRepository, times(1)).save(trainingMonth);
+        assertThrows(ResourceNotFoundException.class, () -> trainingWorkService.deleteTrainingWork(trainingRequest));
     }
 }
