@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -29,7 +30,7 @@ public class TrainingRequest {
 
     @NotNull(message = "Date is required")
     @Past(message = "Date must be in the past")
-    private Date date;
+    private LocalDate date;
 
     @Positive(message = "Duration must be positive")
     @NotNull(message = "Duration is required")
