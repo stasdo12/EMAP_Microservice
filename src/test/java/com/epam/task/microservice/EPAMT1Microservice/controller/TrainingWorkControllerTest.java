@@ -43,7 +43,7 @@ class TrainingWorkControllerTest {
         trainingRequest.setFirstName("John");
         trainingRequest.setLastName("Doe");
         trainingRequest.setIsActive(true);
-        trainingRequest.setDate(new Date(2024 - 1900, 11, 3));
+        trainingRequest.setDate(LocalDate.of(2024, 12, 3));
         trainingRequest.setDuration(10);
         trainingRequest.setAction("someAction");
     }
