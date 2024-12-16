@@ -1,8 +1,12 @@
 package com.epam.task.microservice.EPAMT1Microservice.model;
 
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.UUID;
 
 @Document(collection = "training_month_mongo")
 @Data
@@ -13,6 +17,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class TrainingMonthMongo {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
 
     private String monthName;
