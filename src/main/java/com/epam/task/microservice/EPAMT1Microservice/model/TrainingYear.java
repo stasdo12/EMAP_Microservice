@@ -1,24 +1,25 @@
 package com.epam.task.microservice.EPAMT1Microservice.model;
 
-import jakarta.persistence.Entity;
+
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import lombok.Data;
 import lombok.ToString;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.List;
 
-@Entity
+
 @Data
 @ToString
+@Document(collection = "training_year_mongo")
 public class TrainingYear {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private String id;
     private String yearNumber;
 
-    @OneToMany
     private List<TrainingMonth> months;
 
 }

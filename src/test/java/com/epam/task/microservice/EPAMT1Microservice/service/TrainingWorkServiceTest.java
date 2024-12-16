@@ -73,7 +73,6 @@ class TrainingWorkServiceTest {
         trainingWork.setActive(true);
         trainingWork.setYears(new ArrayList<>(List.of(trainingYear)));
         when(trainingWorkRepository.findByUsername("testUser")).thenReturn(Optional.of(trainingWork));
-        when(trainingMonthRepository.findById(anyLong())).thenReturn(Optional.of(trainingMonth));
 
     }
 
