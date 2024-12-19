@@ -29,17 +29,28 @@ public class TrainingWorkService {
 
     @RabbitListener(queues = "${queue.rabbitMQ.name}")
     public void acceptTrainerWork(TrainingRequest trainingRequest) {
+        long startTime = System.currentTimeMillis();
         String transactionId = MDC.get("Transaction-ID");
         log.info("Transaction ID in service: {}", transactionId);
         if ("add".equalsIgnoreCase(trainingRequest.getAction())) {
             log.info("Adding training work for username: {}", trainingRequest.getUsername());
             addTrainingWork(trainingRequest);
             log.info("Added trained work with Transaction ID: {}", transactionId);
+            long endTime = System.currentTimeMillis();
+            System.out.println("Время выполнения: " + (endTime - startTime) + " мс");
+            //TODO delete all this code
         } else {
             log.info("Deleting training work for username: {}", trainingRequest.getUsername());
             deleteTrainingWork(trainingRequest);
             log.info("Deleted trained work with Transaction ID: {}", transactionId);
         }
+    }
+
+    public TrainingWork getTrainerWork(String username){
+        return trainingWorkRepository.findByUsername(username).orElseThrow(()->{
+        log.error("Training Work not found for username: {}", username);
+        return new ResourceNotFoundException("Training work not found for username: " + username);
+        });
     }
 
     public void addTrainingWork(TrainingRequest trainingRequest) {
@@ -203,6 +214,7 @@ public class TrainingWorkService {
         }
         return trainingYears;
     }
+
 
     private void removeTrainingMonth(List<TrainingMonth> trainingMonths, String month, TrainingRequest trainingRequest) {
         Iterator<TrainingMonth> monthIterator = trainingMonths.iterator();

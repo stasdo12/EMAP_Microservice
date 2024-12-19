@@ -1,9 +1,7 @@
 package com.epam.task.microservice.EPAMT1Microservice.model;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,10 +20,10 @@ public class TrainingWork {
 
     @Id
     private String id;
+
+    @Indexed(unique = true)
     private String username;
-    @Indexed
     private String firstName;
-    @Indexed
     private String lastName;
     private boolean isActive;
 
