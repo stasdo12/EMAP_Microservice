@@ -1,6 +1,7 @@
 package com.epam.task.microservice.EPAMT1Microservice.controller;
 
 import com.epam.task.microservice.EPAMT1Microservice.model.DTO.TrainingRequest;
+import com.epam.task.microservice.EPAMT1Microservice.model.TrainingWork;
 import com.epam.task.microservice.EPAMT1Microservice.service.TrainingWorkService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
@@ -56,6 +57,12 @@ public class TrainingWorkController {
         trainingWorkService.deleteTrainingWork(trainingRequest);
         log.info("Successfully deleted training work for trainer: {}", trainingRequest.getUsername());
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/TrainingWork/{username}")
+    public TrainingWork getTrainingWorkByUsername( @PathVariable String username){
+        log.debug("Get training work by username : {}", username);
+        return trainingWorkService.getTrainerWork(username);
     }
 
 }
