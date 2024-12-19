@@ -1,30 +1,33 @@
 package com.epam.task.microservice.EPAMT1Microservice.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.List;
 
-@Entity
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Document(collection = "training_work_mongo")
 public class TrainingWork {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
+
+    @Indexed(unique = true)
     private String username;
     private String firstName;
     private String lastName;
     private boolean isActive;
 
-    @OneToMany
+    @DBRef
     private List<TrainingYear> years;
 
 }

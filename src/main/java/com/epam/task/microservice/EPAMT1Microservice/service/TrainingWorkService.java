@@ -12,11 +12,12 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.List;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -26,18 +27,30 @@ public class TrainingWorkService {
     private final TrainingMonthRepository trainingMonthRepository;
     private static final Logger log = LoggerFactory.getLogger(TrainingWorkService.class);
 
+    @RabbitListener(queues = "${queue.rabbitMQ.name}")
     public void acceptTrainerWork(TrainingRequest trainingRequest) {
+        long startTime = System.currentTimeMillis();
         String transactionId = MDC.get("Transaction-ID");
         log.info("Transaction ID in service: {}", transactionId);
         if ("add".equalsIgnoreCase(trainingRequest.getAction())) {
             log.info("Adding training work for username: {}", trainingRequest.getUsername());
             addTrainingWork(trainingRequest);
             log.info("Added trained work with Transaction ID: {}", transactionId);
+            long endTime = System.currentTimeMillis();
+            System.out.println("Время выполнения: " + (endTime - startTime) + " мс");
+            //TODO delete all this code
         } else {
             log.info("Deleting training work for username: {}", trainingRequest.getUsername());
             deleteTrainingWork(trainingRequest);
             log.info("Deleted trained work with Transaction ID: {}", transactionId);
         }
+    }
+
+    public TrainingWork getTrainerWork(String username){
+        return trainingWorkRepository.findByUsername(username).orElseThrow(()->{
+        log.error("Training Work not found for username: {}", username);
+        return new ResourceNotFoundException("Training work not found for username: " + username);
+        });
     }
 
     public void addTrainingWork(TrainingRequest trainingRequest) {
@@ -58,8 +71,10 @@ public class TrainingWorkService {
                             + trainingRequest.getUsername());
                 });
 
+        LocalDate localDate = trainingRequest.getDate();
+        Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(trainingRequest.getDate());
+        calendar.setTime(date);
         String currentYear = String.valueOf(calendar.get(Calendar.YEAR));
         String currentMonth = String.valueOf(calendar.get(Calendar.MONTH));
 
@@ -100,8 +115,10 @@ public class TrainingWorkService {
 
     private TrainingYear createTrainingYears(TrainingRequest trainingRequest) {
         TrainingYear trainingYears = new TrainingYear();
+        LocalDate localDate = trainingRequest.getDate();
+        Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(trainingRequest.getDate());
+        calendar.setTime(date);
         trainingYears.setYearNumber(String.valueOf(calendar.get(Calendar.YEAR)));
         List<TrainingMonth> months = new ArrayList<>();
         months.add(createTrainingMonth(trainingRequest));
@@ -116,8 +133,10 @@ public class TrainingWorkService {
         List<TrainingYear> trainingYears = trainingWork.getYears();
         boolean present = false;
         for (TrainingYear year : trainingYears) {
+            LocalDate localDate = trainingRequest.getDate();
+            Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             Calendar calendar = Calendar.getInstance();
-            calendar.setTime(trainingRequest.getDate());
+            calendar.setTime(date);
             if (year.getYearNumber().equals(String.valueOf(calendar.get(Calendar.YEAR)))) {
                 List<TrainingMonth> months = updateTrainingMonth(year, trainingRequest);
                 year.setMonths(months);
@@ -137,8 +156,10 @@ public class TrainingWorkService {
 
     private TrainingMonth createTrainingMonth(TrainingRequest trainingRequest) {
         TrainingMonth trainingMonth = new TrainingMonth();
+        LocalDate localDate = trainingRequest.getDate();
+        Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(trainingRequest.getDate());
+        calendar.setTime(date);
         trainingMonth.setMonthName(String.valueOf(calendar.get(Calendar.MONTH)));
         trainingMonth.setHours(trainingRequest.getDuration());
         trainingMonthRepository.save(trainingMonth);
@@ -151,8 +172,10 @@ public class TrainingWorkService {
         List<TrainingMonth> trainingMonths = trainingYears.getMonths();
         boolean present = false;
         for (TrainingMonth month : trainingMonths) {
+            LocalDate localDate = trainingRequest.getDate();
+            Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             Calendar calendar = Calendar.getInstance();
-            calendar.setTime(trainingRequest.getDate());
+            calendar.setTime(date);
             if (month.getMonthName().equals(String.valueOf(calendar.get(Calendar.MONTH)))) {
                 int hours = month.getHours() + trainingRequest.getDuration();
                 month.setHours(hours);
@@ -191,6 +214,7 @@ public class TrainingWorkService {
         }
         return trainingYears;
     }
+
 
     private void removeTrainingMonth(List<TrainingMonth> trainingMonths, String month, TrainingRequest trainingRequest) {
         Iterator<TrainingMonth> monthIterator = trainingMonths.iterator();

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.slf4j.MDC;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +55,7 @@ class TrainingWorkServiceTest {
         trainingRequest.setFirstName("John");
         trainingRequest.setLastName("Doe");
         trainingRequest.setIsActive(true);
-        trainingRequest.setDate(new Date());
+        trainingRequest.setDate(LocalDate.of(2024, 12, 3));
         trainingRequest.setDuration(5);
 
         trainingMonth = new TrainingMonth();
@@ -72,7 +73,6 @@ class TrainingWorkServiceTest {
         trainingWork.setActive(true);
         trainingWork.setYears(new ArrayList<>(List.of(trainingYear)));
         when(trainingWorkRepository.findByUsername("testUser")).thenReturn(Optional.of(trainingWork));
-        when(trainingMonthRepository.findById(anyLong())).thenReturn(Optional.of(trainingMonth));
 
     }
 
