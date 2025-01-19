@@ -29,16 +29,12 @@ public class TrainingWorkService {
 
     @RabbitListener(queues = "${queue.rabbitMQ.name}")
     public void acceptTrainerWork(TrainingRequest trainingRequest) {
-        long startTime = System.currentTimeMillis();
         String transactionId = MDC.get("Transaction-ID");
         log.info("Transaction ID in service: {}", transactionId);
         if ("add".equalsIgnoreCase(trainingRequest.getAction())) {
             log.info("Adding training work for username: {}", trainingRequest.getUsername());
             addTrainingWork(trainingRequest);
             log.info("Added trained work with Transaction ID: {}", transactionId);
-            long endTime = System.currentTimeMillis();
-            System.out.println("Время выполнения: " + (endTime - startTime) + " мс");
-            //TODO delete all this code
         } else {
             log.info("Deleting training work for username: {}", trainingRequest.getUsername());
             deleteTrainingWork(trainingRequest);
