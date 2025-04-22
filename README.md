@@ -35,7 +35,7 @@ The service is built with **Spring Boot**, uses **REST API** architecture, and i
 
 ### `POST /training-work/add`
 Add new training work record for a trainer.
-```json
+
 Request Body:
 {
   "username": "trainer.username",
